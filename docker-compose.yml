@@ -1,0 +1,68 @@
+version: '3.2'
+
+services:
+  freshrss:
+    image: freshrss/freshrss
+    container_name: freshrss
+    hostname: freshrss
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: 10m
+    volumes:
+      - rss-data:/var/www/FreshRSS/data
+      - rss-extensions:/var/www/FreshRSS/extensions
+    ports:
+      - "${PUBLISHED_PORT:-8080}:${LISTEN:-80}"
+    environment:
+      TZ: Asia/Shanghai
+      CRON_MIN: '3,33'
+
+  rsshub:
+    image: diygod/rsshub
+    container_name: rsshub
+    hostname: rsshub
+    restart: unless-stopped
+    ports:
+      - '1200:1200'
+    environment:
+      NODE_ENV: production
+      CACHE_TYPE: redis
+      REDIS_URL: 'redis://redis:6379/'
+      PUPPETEER_WS_ENDPOINT: 'ws://browserless-chrome:3000'
+      GITHUB_ACCESS_TOKEN: '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'
+    depends_on:
+      - redis
+      - browserless-chrome
+  
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io
+    container_name: changedetection
+    hostname: changedetection
+    volumes:
+      - rss-changedetection-data:/datastore
+    environment:
+      - PLAYWRIGHT_DRIVER_URL=ws://browserless-chrome:3000/?stealth=1&--disable-web-security=true
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    depends_on:
+      - browserless-chrome
+
+  browserless-chrome:
+    # default hostname is the service name
+    image: browserless/chrome
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    volumes:
+      - rss-redis-data:/data
+
+volumes:
+  rss-changedetection-data:
+  rss-redis-data:
+  rss-data:
+  rss-extensions:
+
