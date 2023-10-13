@@ -39,7 +39,8 @@ def main(urls: list[str]):
         title="CS updates on arXiv.org",
         link="'http://arxiv.org/'",
         description="'Computer Science updates on the arXiv.org e-print archive'",
-        lastBuildDate=datetime.now(),
+        # lastBuildDate will be auto generated, equal to the latest item's pubdate
+        lastBuildDate=None,
         image="https://arxiv.org/icons/sfx.gif"
     )
 

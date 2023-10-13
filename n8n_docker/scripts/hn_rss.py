@@ -3,6 +3,7 @@ import feedgenerator
 from datetime import datetime
 
 rss_file = '/home/files/hacker_news.rss'
+# rss_file = "/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/hacker_news.rss"
 
 hn_urls = [
     "https://hnrss.org/frontpage",
@@ -21,8 +22,9 @@ def main(urls: list[str] = hn_urls):
         title=input_feeds[0].feed.title,
         link=input_feeds[0].feed.link,
         description=input_feeds[0].feed.subtitle,
-        # will not cause item duplication
-        lastBuildDate=datetime.now()
+        # lastBuildDate will be auto generated, equal to the latest item's pubdate
+        lastBuildDate=None,
+        image="https://news.ycombinator.com/y18.svg"
     )
 
     # deduplicate inside each excution
