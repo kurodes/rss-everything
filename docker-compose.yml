@@ -13,7 +13,7 @@ services:
       - rss-data:/var/www/FreshRSS/data
       - rss-extensions:/var/www/FreshRSS/extensions
     ports:
-      - "${PUBLISHED_PORT:-8080}:${LISTEN:-80}"
+      - 8080:80
     environment:
       TZ: Asia/Shanghai
       CRON_MIN: '3,33'
@@ -24,7 +24,7 @@ services:
     hostname: rsshub
     restart: unless-stopped
     ports:
-      - '1200:1200'
+      - 1200:1200
     environment:
       NODE_ENV: production
       CACHE_TYPE: redis

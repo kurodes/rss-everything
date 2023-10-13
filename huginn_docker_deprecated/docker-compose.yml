@@ -1,0 +1,12 @@
+version: '3'
+services:
+  huginn:
+    # image: ghcr.io/huginn/huginn
+    build:
+      context: .
+      dockerfile: huginn_Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - /Users/kuro/Desktop/coding/rss-everything/huginn_docker/mysql-data:/var/lib/mysql
+      - /Users/kuro/Desktop/coding/rss-everything/huginn_docker/script:/home/script
