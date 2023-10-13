@@ -5,7 +5,7 @@ import openai
 import re
 from time import sleep
 
-openai.api_key = open("/root/rss-everything/api_key").read().strip()
+openai.api_key = open("/home/scripts/api_key").read().strip()
 # openai.api_key = "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"
 
 rss_file = '/home/files/arxiv.rss'
