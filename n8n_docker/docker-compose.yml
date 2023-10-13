@@ -4,7 +4,7 @@ services:
     # image: docker.n8n.io/n8nio/n8n
     build:
       context: .
-      dockerfile: n8n_Dockerfile
+      dockerfile: Dockerfile_n8n
     restart: unless-stopped
     ports:
       - 5678:5678
