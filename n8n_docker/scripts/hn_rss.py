@@ -2,6 +2,8 @@ import feedparser
 import feedgenerator
 from datetime import datetime
 
+rss_file = '/home/files/hacker_news.rss'
+
 hn_urls = [
     "https://hnrss.org/frontpage",
     "https://hnrss.org/active",
@@ -9,7 +11,6 @@ hn_urls = [
     "https://hnrss.org/newest?points=100",
     "https://hnrss.org/bestcomments"
 ]
-
 
 def main(urls: list[str] = hn_urls):
     input_feeds = []
@@ -20,12 +21,8 @@ def main(urls: list[str] = hn_urls):
         title=input_feeds[0].feed.title,
         link=input_feeds[0].feed.link,
         description=input_feeds[0].feed.subtitle,
-        lastBuildDate=max(
-            [
-                datetime.strptime(feed.feed.updated, "%a, %d %b %Y %H:%M:%S %z")
-                for feed in input_feeds
-            ]
-        ),
+        # will not cause item duplication
+        lastBuildDate=datetime.now()
     )
 
     # deduplicate inside each excution
@@ -50,12 +47,11 @@ def main(urls: list[str] = hn_urls):
                 )
                 unique_ids.add(item.id)
 
-    xml_string = output_feed.writeString("utf-8")
-    print(xml_string)
-
-    # with open('hn.rss', 'w') as fp:
-    #     output_feed.write(fp, 'utf-8')
-
+    # xml_string = output_feed.writeString("utf-8")
+    # print(xml_string)
+    
+    with open(rss_file, 'w') as fp:
+        output_feed.write(fp, 'utf-8')
 
 if __name__ == "__main__":
     main(hn_urls)
