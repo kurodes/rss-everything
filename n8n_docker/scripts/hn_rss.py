@@ -24,7 +24,7 @@ def main(urls: list[str] = hn_urls):
         description=input_feeds[0].feed.subtitle,
         # lastBuildDate will be auto generated, equal to the latest item's pubdate
         lastBuildDate=None,
-        image="https://news.ycombinator.com/y18.svg"
+        image="y18.svg"
     )
 
     # deduplicate inside each excution
