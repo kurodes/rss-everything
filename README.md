@@ -18,3 +18,9 @@ update
 ## potential playwright memory leak
 
 https://github.com/dgtlmoon/changedetection.io/wiki/Playwright-content-fetcher#playwright-memory-leak
+
+
+## reverse proxy for subdomain
+caddy
+
+
