@@ -1,6 +1,7 @@
 import feedparser
 import feedgenerator
 from datetime import datetime
+from typing import List
 
 rss_file = '/home/files/hacker_news.rss'
 # rss_file = "/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/hacker_news.rss"
@@ -13,7 +14,7 @@ hn_urls = [
     "https://hnrss.org/bestcomments"
 ]
 
-def main(urls: list[str] = hn_urls):
+def main(urls: List[str]):
     input_feeds = []
     for url in urls:
         input_feeds.append(feedparser.parse(url))

@@ -4,8 +4,10 @@ from datetime import datetime
 import openai
 import re
 from time import sleep
+from typing import List
 
-openai.api_key = open("/home/scripts/api_key").read().strip()
+OPENAI_API_KEY = open("/home/scripts/openai_api_key").read().strip()
+openai.api_key = OPENAI_API_KEY
 # openai.api_key = "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"
 
 rss_file = '/home/files/arxiv.rss'
@@ -30,7 +32,7 @@ def getCompletion(messages):
     return response
 
 
-def main(urls: list[str]):
+def main(urls: List[str]):
     input_feeds = []
     for url in urls:
         input_feeds.append(feedparser.parse(url))

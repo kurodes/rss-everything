@@ -1,4 +1,9 @@
 FROM docker.n8n.io/n8nio/n8n
+# swith to root
 USER root
 RUN apk add --update python3 py3-pip
-RUN python3 -m pip install openai feedparser feedgenerator bs4 requests
+RUN python3 -m pip install feedparser feedgenerator 
+RUN python3 -m pip install openai slack_sdk
+RUN python3 -m pip install bs4 requests selenium
+# switch back to the original pod user
+USER node
