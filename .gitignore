@@ -3,3 +3,5 @@ slack_api_user_token
 mysql-data
 .vscode
 files
+__pycache__
+.DS_Store
