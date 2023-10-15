@@ -10,8 +10,6 @@ from rss_feed import RssFeed
 from slack_client import SlackClient
 
 TEST_LOCAL = False
-if len(sys.argv) > 1 and sys.argv[1] == "test":
-    TEST_LOCAL = True
 
 if not TEST_LOCAL:
     rss_file = '/home/files/slack_distsys_reading_group.rss'
@@ -25,11 +23,7 @@ if not TEST_LOCAL:
 else:
     SLACK_API_TOKEN = open("/Users/kuro/Desktop/coding/rss-everything/n8n_docker/scripts/slack_api_user_token").read().strip()
 
-def generate_rss(messages: List[List[str]]):
-    """
-    Args:
-        messages: list of thread
-    """
+def generate_rss(conversations: List[Dict]):
     feed = RssFeed(
         title="Slack - DistSys Reading Group",
         link="https://distsysreadinggroup.slack.com",
@@ -39,38 +33,43 @@ def generate_rss(messages: List[List[str]]):
         image_url="https://a.slack-edge.com/80588/marketing/img/meta/favicon-32.png"
     )
 
-    for thread in messages:
-        # escape special char
-        description_html = '<p style="margin-left: 0;"><b>{}</b></p>'.format(html.escape(thread["message"]))
-        description_html += '<ul style="margin-left: 20px;">'
-        for reply in thread["replies"]:
-            description_html += '<li>{}</li>'.format(html.escape(reply))
-        description_html += '</ul>'
+    for conversation in conversations:
+        # generate html for item description
+        # message
+        description_html = '<div style="margin-left: 0;"><p><b>{}</b></p><p>{}</p></div>'.format(
+            conversation["messages"][0]["user"], html.escape(conversation["messages"][0]["text"]).replace('\n', '<br>'))
+        description_html += '<hr>'
+        # replies
+        description_html += '<div style="padding-left: 20px;">'
+        for reply in conversation["messages"][1:]:
+            description_html += '<p><b>{}</b></p><p>{}</p>'.format(
+                reply["user"], html.escape(reply["text"]).replace('\n', '<br>'))
+            description_html += '<hr>'
+        description_html += '</div>'
+
 
         feed.add_item(
-            title=thread["message"],
-            # title=html.escape(thread["message"]),
-            # title=RssFeed.excape_to_hexadecimal_references(thread["message"]),
-            link=thread["link"],
-            guid=thread["timestamp"],
+            title=conversation["messages"][0]["text"],
+            link=conversation["link"],
+            guid=conversation["timestamp"],
             description=description_html,
-            pubdate=RssFeed.datetime_to_rfc822(datetime.fromtimestamp(float(thread["timestamp"])))
+            pubdate=RssFeed.datetime_to_rfc822(datetime.fromtimestamp(float(conversation["timestamp"])))
         )
 
     # print(feed.wriTEST_LOCALring("utf-8"))
     with open(rss_file, 'w') as fp:
         feed.write(fp)
 
-# load/store last timestamp in filesystem
+# load the last timestamp from filesystem
 unix_timestamp = datetime(year=2023, month=10, day=8, hour=0, minute=0, second=0).timestamp()
 if os.path.exists(timestamp_file):
     with open(timestamp_file, 'r') as fp:
         unix_timestamp = (float)(fp.read().strip())
 
 slack_client = SlackClient(SLACK_API_TOKEN)
-messages, new_unix_timestamp = slack_client.get_channel_messages("general", unix_timestamp)
+conversations, new_unix_timestamp = slack_client.get_channel_conversations("general", unix_timestamp)
 
-generate_rss(messages)
+generate_rss(conversations)
 
 with open(timestamp_file, 'w') as fp:
     fp.write(str(new_unix_timestamp))
