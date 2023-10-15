@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import html
+import json
 from datetime import datetime
 from typing import List, Tuple, Dict
 from slack_sdk import WebClient
@@ -12,16 +13,15 @@ from slack_client import SlackClient
 TEST_LOCAL = False
 
 if not TEST_LOCAL:
-    rss_file = '/home/files/slack_distsys_reading_group.rss'
-    timestamp_file = '/home/files/slack_distsys_reading_group.timestamp'
+    BASE_PATH = '/home'
 else:
-    rss_file = '/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/slack_distsys_reading_group.rss'
-    timestamp_file = '/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/slack_distsys_reading_group.timestamp'
+    BASE_PATH = '/Users/kuro/Desktop/coding/rss-everything/n8n_docker'
 
-if not TEST_LOCAL:
-    SLACK_API_TOKEN = open("/home/scripts/slack_api_user_token").read().strip()
-else:
-    SLACK_API_TOKEN = open("/Users/kuro/Desktop/coding/rss-everything/n8n_docker/scripts/slack_api_user_token").read().strip()
+RSS_FILE = f'{BASE_PATH}/files/slack_distsys_reading_group.rss'
+TS_FILE = f'{BASE_PATH}/files/slack_distsys_reading_group.timestamp'
+CACHE_FILE = f'{BASE_PATH}/files/slack_user.global.cache'
+
+SLACK_API_TOKEN = open(f'{BASE_PATH}/scripts/slack_api_user_token').read().strip()
 
 def generate_rss(conversations: List[Dict]):
     feed = RssFeed(
@@ -57,19 +57,19 @@ def generate_rss(conversations: List[Dict]):
         )
 
     # print(feed.wriTEST_LOCALring("utf-8"))
-    with open(rss_file, 'w') as fp:
+    with open(RSS_FILE, 'w') as fp:
         feed.write(fp)
 
 # load the last timestamp from filesystem
 unix_timestamp = datetime(year=2023, month=10, day=8, hour=0, minute=0, second=0).timestamp()
-if os.path.exists(timestamp_file):
-    with open(timestamp_file, 'r') as fp:
+if os.path.exists(TS_FILE):
+    with open(TS_FILE, 'r') as fp:
         unix_timestamp = (float)(fp.read().strip())
 
-slack_client = SlackClient(SLACK_API_TOKEN)
+slack_client = SlackClient(SLACK_API_TOKEN, CACHE_FILE)
 conversations, new_unix_timestamp = slack_client.get_channel_conversations("general", unix_timestamp)
 
 generate_rss(conversations)
 
-with open(timestamp_file, 'w') as fp:
+with open(TS_FILE, 'w') as fp:
     fp.write(str(new_unix_timestamp))

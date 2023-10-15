@@ -1,20 +1,41 @@
+import os
+import json
+import tempfile
 from time import sleep
 from slack_sdk import WebClient 
 from typing import Dict, List, Tuple
 
 class SlackClient:
 
-    def __init__(self, slack_api_token) -> None:
+    def __init__(self, slack_api_token, user_cache_path) -> None:
+        """
+        Args:
+            user_cache_path: user cache is a map from user id to user name (atomic updated by rename)
+        """
         self.slack_client = WebClient(token=slack_api_token)
+        self.user_cache_path = user_cache_path
 
-    def get_user_name(self, user_id) -> str:
+        # load user cache from filesystem
+        self.user_cache = {"example id": "example name"}
+        if os.path.exists(self.user_cache_path):
+            with open(self.user_cache_path, 'r') as fp:
+                self.user_cache = json.load(fp)
+
+    def __get_user_name(self, user_id: str) -> str:
+        # cache hit
+        if user_id in self.user_cache:
+            return self.user_cache[user_id]
+        # cache miss
         response = self.slack_client.users_info(user=user_id)
         if response["ok"]:
-            return response["user"]["real_name"]
+            # add to cache
+            user_name = response["user"]["real_name"]
+            self.user_cache[user_id] = user_name
+            return user_name
         else:
             return "Failed to get user name"
 
-    def get_public_channels(self):
+    def __get_public_channels(self):
         """
         Returns:
             channels: dict of { name : id }
@@ -59,7 +80,7 @@ class SlackClient:
                 sleep(1.2)
         return messages
 
-    def get_conversations(self, channel_id, oldest: float) -> Tuple[List[Dict], float]:
+    def __get_conversations(self, channel_id, oldest: float) -> Tuple[List[Dict], float]:
         """
         Args:
             channel_ids: channel id
@@ -85,7 +106,7 @@ class SlackClient:
                         conversation["messages"] = self.get_thread_messages(channel_id, iter["ts"])
                     # get user name of each text
                     for msg_iter in conversation["messages"]:
-                        msg_iter["user"] = self.get_user_name(msg_iter["user"])
+                        msg_iter["user"] = self.__get_user_name(msg_iter["user"])
                         sleep(1.2)
                     
                     conversations.append(conversation)
@@ -113,7 +134,14 @@ class SlackClient:
         Returns:
             `[{"link": str, "timestamp": unix_timestamp, "messages": [{"message": str, "user": str}] }], unix_timestamp`
         """
-        channels = self.get_public_channels()
+        channels = self.__get_public_channels()
         channel_id = channels[slack_channel]
-        conversations, new_unix_timestamp = self.get_conversations(channel_id, oldest)
+        conversations, new_unix_timestamp = self.__get_conversations(channel_id, oldest)
+
+        # update cache file atomically with rename
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        with open(temp_file.name, 'w') as fp:
+            json.dump(self.user_cache, fp)
+        os.rename(temp_file.name, self.user_cache_path)
+
         return conversations, new_unix_timestamp
