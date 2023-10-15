@@ -8,6 +8,7 @@ from slack_sdk import WebClient
 
 from rss_feed import RssFeed
 
+TEST_LOCAL = False
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     TEST_LOCAL = True
 
