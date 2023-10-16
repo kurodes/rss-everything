@@ -1,70 +1,60 @@
 from datetime import datetime
 
 class RssFeed:
-    def __init__(self, title, link, description, feed_link, lastBuildDate: str = None, image_url=None) -> None:
+    def __init__(self, title, description, link, feed_link, lastBuildDate: str = None, image_url=None) -> None:
         """
+        Important: 
+            1: Only use HTML markup in the `item.description`
+            2: URL should be full path with https://
+
         Args:
-            title: not support html
-            link: https://
-            description: not support html
-            feed_link: https://
-            lastBuildDate: rfc822 time string
-            image_url: https:// to gif, jpeg or png
-
-        Rss 2.0 Spec: https://cyber.harvard.edu/rss/rss.html
-        RSS Advisory Board's Best Practices Profile: https://www.rssboard.org/rss-profile
+            lastBuildDate       : rfc822 time string
+            image_url           : gif, jpeg or png
         """
-
         self.flag_dublin_ns = False
 
         # metadata of the feed
-        self.title = self.remove_special_chars(title)
+        self.title = title
         self.link = link
         self.feed_link = feed_link
-        self.description = self.remove_special_chars(description)
+        self.description = description
         self.lastBuildDate = lastBuildDate
         self.image_url = image_url
 
         # posts of the feed
         self.items = []
 
-    def remove_special_chars(self, string):
-        """
-        Better not contain HTML or HTML escapes in elements other than items' <description>.
-
-        https://www.rssboard.org/rss-validator/docs/warning/CharacterData.html
-        https://www.rssboard.org/rss-validator/docs/warning/ContainsHTML.html
-        """
-        special_chars = ["&", "<", ">"]
-        for char in special_chars:
-            string = string.replace(char, ' ')
-        return string
-
     def now_rfc822() -> str:
         """
         Returns:
-            str: Current time in RFC 822 format, here we use UTC.
+            str: Current time in RFC 822 format (UTC is used here)
         """
         now = datetime.utcnow()
         rfc822 = now.strftime("%a, %d %b %Y %H:%M:%S +0000")
         return rfc822
 
     def datetime_to_rfc822(dt: datetime) -> str:
+        """
+        Args:
+            dt: datatime in UTC, `datetime.utcnow()`
+        Returns:
+            str: Time in RFC 822 format. Timezone is based on the `datetime` 
+        """
         rfc822 = dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
         return rfc822
 
     def add_item(self, title, link, guid, description, pubdate : str = None, creator_dublin_core=None):
         """
+        Important:
+            1: Only use HTML markup in the `item.description`
+            2: URL should be full path with https://
         Args:
-            title: not support html
-            link: https://
-            guid:
-            description: support html, `html.escape(html_str)`
-            pubdate: rfc822 time string
+            description: HTML string (no need to escape due to `CDATA` wrapping)
+            pubdate: time string in RFC 822 format (`now_rfc822()`)
             creator_dublin_core: name of the creator
         """
         self.items.append({
-            "title": self.remove_special_chars(title),
+            "title": title,
             "link": link,
             "guid": guid,
             "description": description,
