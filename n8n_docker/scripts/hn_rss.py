@@ -2,15 +2,15 @@ import feedparser
 import feedgenerator
 from datetime import datetime
 from typing import List
+from time import sleep
 
 rss_file = '/home/files/hacker_news.rss'
 # rss_file = "/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/hacker_news.rss"
 
 hn_urls = [
-    "https://hnrss.org/frontpage",
-    "https://hnrss.org/active",
+    "https://hnrss.org/frontpage?points=100",
+    "https://hnrss.org/frontpage?comments=50",
     "https://hnrss.org/best",
-    "https://hnrss.org/newest?points=100",
     "https://hnrss.org/bestcomments"
 ]
 
@@ -18,6 +18,7 @@ def main(urls: List[str]):
     input_feeds = []
     for url in urls:
         input_feeds.append(feedparser.parse(url))
+        sleep(1.2)
 
     output_feed = feedgenerator.Rss201rev2Feed(
         title=input_feeds[0].feed.title,
