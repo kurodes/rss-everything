@@ -86,7 +86,7 @@ class SlackClient:
             channel_ids: channel id
             oldest: return conversations after this Unix timestamp (UTC)
         """
-        new_oldest = 0.1
+        new_oldest = oldest
         conversations = []
         cursor = None
         while True:
@@ -139,9 +139,11 @@ class SlackClient:
         conversations, new_unix_timestamp = self.__get_conversations(channel_id, oldest)
 
         # update cache file atomically with rename
-        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        # set temp file at the same dir, as os.rename cannot cross filesystem
+        dirpath, _ = os.path.split(self.user_cache_path)
+        temp_file = tempfile.NamedTemporaryFile(dir=dirpath, delete=False)
         with open(temp_file.name, 'w') as fp:
-            json.dump(self.user_cache, fp)
+            json.dump(self.user_cache, fp)   
         os.rename(temp_file.name, self.user_cache_path)
 
         return conversations, new_unix_timestamp
