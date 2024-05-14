@@ -9,17 +9,14 @@ OPENAI_API_KEY = open("/home/scripts/openai_api_key").read().strip()
 openai.api_key = OPENAI_API_KEY
 # openai.api_key = "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"
 GPT3 = "gpt-3.5-turbo" 
-GPT4 = "gpt-4-turbo",
+GPT4 = "gpt-4o",
 
 rss_file = '/home/files/arxiv.rss'
 # rss_file = "/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/arxiv.rss"
 
+# +cs.NI
 arxiv_urls = [
-    "https://rss.arxiv.org/rss/cs.DB+cs.DC+cs.NI+cs.OS",
-    # "http://export.arxiv.org/rss/cs.DB",
-    # "http://export.arxiv.org/rss/cs.DC",
-    # "http://export.arxiv.org/rss/cs.NI",
-    # "http://export.arxiv.org/rss/cs.OS"
+    "https://rss.arxiv.org/rss/cs.DB+cs.DC+cs.OS"
 ]
 
 def getCompletion(messages, model=GPT3):
