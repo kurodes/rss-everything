@@ -21,7 +21,11 @@ history_file = '/home/files/history.json'
 arxiv_urls = [
     "https://rss.arxiv.org/rss/cs.DB+cs.DC+cs.OS"
 ]
-focus_categories = ["cs.DB", "cs.DC", "cs.OS"]
+focus_terms = {
+    "cs.DB": "Databases", 
+    "cs.DC": "Distributed, Parallel, and Cluster Computing", 
+    "cs.OS": "Operating Systems"
+}
 
 def getCompletion(messages, model=GPT3):
     client = OpenAI(
@@ -64,7 +68,7 @@ def main(urls: List[str]):
     for feed in input_feeds:
         for item in feed.entries:
             # check the first category
-            if item.tags[0].term not in focus_categories:
+            if item.tags[0].term not in focus_terms.keys():
                 continue
             # check duplication
             if item.link in history["links"]:
@@ -75,13 +79,19 @@ def main(urls: List[str]):
                 history["links"] = history["links"][-1000:]
 
             abstract = item.summary.split("Abstract: ")[1]
-            terms = ", ".join([tag.term for tag in item.tags])
+            terms = ""
+            terms_list = [tag.term for tag in item.tags]
+            for term in terms_list:
+                if term in focus_terms.keys():
+                    terms = terms + f"{term} ({focus_terms[term]})" + "<br>"
+                else:
+                    terms = terms + term + "<br>"
 
             # chatgpt
             messages = [{"role": "system", "content" : "You are a helpful assistant. You can help me by answering my questions. You can also ask me questions."}]
             # messages.append({"role": "user", "content": f"Translate this title of a computer science paper into Chinese: {item.title}"})
             # title_translation = getCompletion(messages, GPT4)
-            messages.append({"role": "user", "content": f"Translate this abstract of a computer science paper into Chinese:\n\n\"\"\"\n{abstract}\n\"\"\""})
+            messages.append({"role": "user", "content": f"Translate this abstract of a computer science paper into Chinese:\n\n{abstract}"})
             # messages.append({"role": "user", "content": f"As a new PhD candidate, I'm having difficulty understanding a computer science paper with the abstract provided below. Please help me by:\n1. Translating the abstract into Chinese.\n2. For each technical term used in the abstract, provide a detailed explanation in English, followed by its translation into Chinese. Organize your response in a list format, with each item containing the technical term, its explanation, and its Chinese translation.\n\n\"\"\"\n{abstract}\n\"\"\""})
             # abs_explanation = re.sub(r'\n', '<br>', getCompletion(messages))
             abs_translation = getCompletion(messages, GPT3)
