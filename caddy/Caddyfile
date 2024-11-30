@@ -13,3 +13,9 @@ rsshub.lvwh.top {
 changedetection.lvwh.top {
 	reverse_proxy /* localhost:5000
 }
+
+lvwh.top {
+    root * /root/rss-everything/caddy/html
+    file_server
+}
+

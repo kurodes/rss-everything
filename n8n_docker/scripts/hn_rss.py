@@ -37,7 +37,7 @@ def main(urls: List[str]):
             if item.id not in unique_ids:
                 output_feed.add_item(
                     title=item.title,
-                    link=item.id,
+                    link=item.link,
                     description=item.title + "<br>" + item.summary,
                     # Indicates when the item was published.
                     pubdate=datetime.strptime(
