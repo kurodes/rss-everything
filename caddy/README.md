@@ -1,8 +1,14 @@
-install caddy
+# Caddy
 
-run caddy in bg
-- caddy start
+```bash
+# start/stop caddy
+systemctl start caddy
+systemctl stop caddy
 
-stop caddy
-- caddy stop
+# update the default Caddyfile
+nvim /etc/caddy/Caddyfile
+
+# reload Caddy
+systemctl reload caddy
+```
 
