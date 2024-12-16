@@ -1,0 +1,20 @@
+n8n.lvwh.top {
+	reverse_proxy localhost:5678
+}
+
+freshrss.lvwh.top {
+	reverse_proxy localhost:8080
+}
+
+rsshub.lvwh.top {
+	reverse_proxy localhost:1200
+}
+
+changedetection.lvwh.top {
+	reverse_proxy localhost:5000
+}
+
+lvwh.top {
+	root * /root/rss-everything/html
+	file_server
+}

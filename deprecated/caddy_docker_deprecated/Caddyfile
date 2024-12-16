@@ -1,6 +1,0 @@
-lvwh.top {
-    reverse_proxy /n8n/* localhost:5678
-    reverse_proxy /freshrss/* localhost:8080
-    reverse_proxy /rsshub/* localhost:1200
-    reverse_proxy /changedetection/* localhost:5000
-}

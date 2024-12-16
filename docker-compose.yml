@@ -1,4 +1,4 @@
-version: '3.2'
+# version: '3.2'
 
 services:
   freshrss:
@@ -10,8 +10,8 @@ services:
       options:
         max-size: 10m
     volumes:
-      - rss-data:/var/www/FreshRSS/data
-      - rss-extensions:/var/www/FreshRSS/extensions
+      - freshrss-data:/var/www/FreshRSS/data
+      - freshrss-extensions:/var/www/FreshRSS/extensions
     ports:
       - 8080:80
     environment:
@@ -40,7 +40,7 @@ services:
     container_name: changedetection
     hostname: changedetection
     volumes:
-      - rss-changedetection-data:/datastore
+      - changedetection-data:/datastore
     environment:
       - PLAYWRIGHT_DRIVER_URL=ws://browserless-chrome:3000/?stealth=1&--disable-web-security=true
     ports:
@@ -58,11 +58,28 @@ services:
     image: redis:alpine
     restart: unless-stopped
     volumes:
-      - rss-redis-data:/data
+      - redis-data:/data
+
+  n8n:
+    # image: docker.n8n.io/n8nio/n8n
+    build:
+      context: .
+      dockerfile: n8n_Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5678:5678
+    environment:
+      - GENERIC_TIMEZONE=Asia/Shanghai
+      - TZ=Asia/Shanghai
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - /root/rss-everything/n8n-scripts:/home/scripts
+      - /root/rss-everything/n8n-files:/home/files
 
 volumes:
-  rss-changedetection-data:
-  rss-redis-data:
-  rss-data:
-  rss-extensions:
+  freshrss-data:
+  freshrss-extensions:
+  changedetection-data:
+  redis-data:
+  n8n-data:
 
