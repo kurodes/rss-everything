@@ -33,6 +33,9 @@ start an interactive shell session inside container
 - `docker exec -it [CONTAINER_ID_OR_NAME] /bin/sh`
 - `exit` or `ctrl-d`
 
+check volume mountpoint, so we can modify files directly
+- `docker volume inspect rss-everything_freshrss-data`
+
 ## Reverse proxy for subdomain
 
 We use caddy as reverse proxy for subdomain. Copy the `Caddyfile` to
