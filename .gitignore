@@ -3,7 +3,9 @@ __pycache__
 .DS_Store
 
 openai_api_key
+dashscope_api_key
 slack_api_user_token
 
-files
+n8n-files/*
+!n8n-files/.gitkeep
 mysql-data

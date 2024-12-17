@@ -1,41 +1,47 @@
 import json
 import os
-import feedparser
-import feedgenerator
 from datetime import datetime
 from time import sleep
 from typing import List
 
+import feedgenerator
+import feedparser
 from openai import OpenAI
 
-# OPENAI_API_KEY = "sk-xxxxx"
 OPENAI_API_KEY = open("/home/scripts/openai_api_key").read().strip()
-GPT3 = "gpt-3.5-turbo" 
-GPT4 = "gpt-4o",
+GPT3 = "gpt-3.5-turbo"
+GPT4 = "gpt-4o"
 
-rss_file = '/home/files/arxiv.rss'
+DASHSCOPE_API_KEY = open("/home/scripts/dashscope_api_key").read().strip()
+QWEN = "qwen-plus"
+
+rss_file = "/home/files/arxiv.rss"
 # rss_file = "/Users/kuro/Desktop/coding/rss-everything/n8n_docker/files/arxiv.rss"
-history_file = '/home/files/history.json'
+history_file = "/home/files/history.json"
 
 # +cs.NI
-arxiv_urls = [
-    "https://rss.arxiv.org/rss/cs.DB+cs.DC+cs.OS"
-]
+arxiv_urls = ["https://rss.arxiv.org/rss/cs.DB+cs.DC+cs.OS"]
 focus_terms = {
-    "cs.DB": "Databases", 
-    "cs.DC": "Distributed, Parallel, and Cluster Computing", 
-    "cs.OS": "Operating Systems"
+    "cs.DB": "Databases",
+    "cs.DC": "Distributed, Parallel, and Cluster Computing",
+    "cs.OS": "Operating Systems",
 }
 
-def getCompletion(messages, model=GPT3):
+
+def getCompletion(messages, model=QWEN):
+    # # openai api
+    # model = GPT3
+    # client = OpenAI(
+    #     api_key=OPENAI_API_KEY,
+    # )
+
+    # baidu api
     client = OpenAI(
-            api_key = OPENAI_API_KEY
+        api_key=DASHSCOPE_API_KEY,
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
     try:
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages
-        )
+        completion = client.chat.completions.create(model=model, messages=messages)
         response = completion.choices[0].message.content
     except Exception as e:
         response = str(e)
@@ -53,15 +59,15 @@ def main(urls: List[str]):
         description="'Computer Science updates on the arXiv.org e-print archive'",
         # lastBuildDate will be auto generated, equal to the latest item's pubdate
         lastBuildDate=None,
-        image="https://arxiv.org/icons/sfx.gif"
+        image="https://arxiv.org/icons/sfx.gif",
     )
 
     if not os.path.exists(history_file):
-        with open(history_file, 'w') as fp:
+        with open(history_file, "w") as fp:
             json.dump({"links": []}, fp)
             fp.close()
 
-    with open(history_file, 'r') as fp:
+    with open(history_file, "r") as fp:
         history = json.load(fp)
         fp.close()
 
@@ -88,13 +94,23 @@ def main(urls: List[str]):
                     terms = terms + term + "<br>"
 
             # chatgpt
-            messages = [{"role": "system", "content" : "You are a helpful assistant. You can help me by answering my questions. You can also ask me questions."}]
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant. You can help me by answering my questions. You can also ask me questions.",
+                }
+            ]
             # messages.append({"role": "user", "content": f"Translate this title of a computer science paper into Chinese: {item.title}"})
             # title_translation = getCompletion(messages, GPT4)
-            messages.append({"role": "user", "content": f"Translate this abstract of a computer science paper into Chinese:\n\n{abstract}"})
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"Translate this abstract of a computer science paper into Chinese:\n\n{abstract}",
+                }
+            )
             # messages.append({"role": "user", "content": f"As a new PhD candidate, I'm having difficulty understanding a computer science paper with the abstract provided below. Please help me by:\n1. Translating the abstract into Chinese.\n2. For each technical term used in the abstract, provide a detailed explanation in English, followed by its translation into Chinese. Organize your response in a list format, with each item containing the technical term, its explanation, and its Chinese translation.\n\n\"\"\"\n{abstract}\n\"\"\""})
             # abs_explanation = re.sub(r'\n', '<br>', getCompletion(messages))
-            abs_translation = getCompletion(messages, GPT3)
+            abs_translation = getCompletion(messages)
 
             formated_description = f"<p>{item.author}</p><p>{terms}</p><p>{abstract}</p><p>{abs_translation}</p>"
 
@@ -111,13 +127,14 @@ def main(urls: List[str]):
     # xml_string = output_feed.writeString("utf-8")
     # print(xml_string)
 
-    with open(history_file, 'w') as fp:
+    with open(history_file, "w") as fp:
         json.dump(history, fp)
         fp.close()
 
-    with open(rss_file, 'w') as fp:
-        output_feed.write(fp, 'utf-8')
+    with open(rss_file, "w") as fp:
+        output_feed.write(fp, "utf-8")
         fp.close()
+
 
 if __name__ == "__main__":
     main(arxiv_urls)
